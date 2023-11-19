@@ -1,5 +1,6 @@
 "use server";
 
+import { signIn } from "@/auth";
 import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -107,4 +108,18 @@ export const deleteInvoice = async (id: string) => {
     return { message: "Database Error: Failed to delete invoice" };
   }
   revalidatePath("/dashboard/invoices");
+};
+
+export const authenticate = async (
+  prevState: string | undefined,
+  formData: FormData
+) => {
+  try {
+    await signIn("credentials", Object.fromEntries(formData));
+  } catch (error) {
+    if ((error as Error).message.includes("CredentialsSignIn")) {
+      return "CredentialsSignIn";
+    }
+    throw error;
+  }
 };
