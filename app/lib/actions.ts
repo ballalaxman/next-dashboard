@@ -20,6 +20,36 @@ const FormSchema = z.object({
   date: z.string(),
 });
 
+const AddStudentFormSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, { message: "Name is Required" }),
+  fatherName: z.string(),
+  motherName: z.string(),
+  contact: z.coerce.string().refine((value) => /^\d{10}$/.test(value), {
+    message: "Mobile number must be a 10-digit number",
+  }),
+  village: z.string().min(1, { message: "Please Enter village" }),
+  classStd: z.string({ invalid_type_error: "Please Select a class" }),
+  status: z.enum(["disqualified", "qualified", "selected"], {
+    invalid_type_error: "Please Select a status.",
+  }),
+  school: z.string().min(1, { message: "Enter School name" }),
+  date: z.string(),
+});
+
+export type studentState = {
+  errors?: {
+    name?: string[];
+    fatherName?: string[];
+    motherName?: string[];
+    contact?: string[];
+    village?: string[];
+    classStd?: string[];
+    status?: string[];
+    school?: string[];
+  };
+};
+
 // create a new invoice
 
 export type State = {
@@ -122,4 +152,50 @@ export const authenticate = async (
     }
     throw error;
   }
+};
+
+const AddStudent = AddStudentFormSchema.omit({ id: true, date: true });
+
+export const addStudent = async (
+  prevState: studentState,
+  formData: FormData
+) => {
+  const validatedFields = AddStudent.safeParse({
+    name: formData.get("name"),
+    fatherName: formData.get("fatherName"),
+    motherName: formData.get("motherName"),
+    contact: formData.get("contact"),
+    village: formData.get("village"),
+    classStd: formData.get("classStd"),
+    status: formData.get("status"),
+    school: formData.get("school"),
+  });
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields, Failed to add student",
+    };
+  }
+  const {
+    name,
+    fatherName,
+    motherName,
+    contact,
+    village,
+    classStd,
+    status,
+    school,
+  } = validatedFields.data;
+  const date = new Date().toISOString().split("T")[0];
+
+  try {
+    await sql`
+        INSERT INTO students (name, father_name, mother_name, contact, village, class_std, status, school, date)
+        VALUES (${name}, ${fatherName}, ${motherName}, ${contact}, ${village}, ${classStd}, ${status}, ${school}, ${date})
+    `;
+  } catch (error) {
+    return { message: "Database Error: Failed to create invoice" };
+  }
+  revalidatePath("/dashboard/students");
+  redirect("/dashboard/students");
 };

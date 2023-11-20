@@ -9,7 +9,7 @@ const Page = async () => {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Invoiced", href: "/dashboard/invoices" },
+          { label: "Invoices", href: "/dashboard/invoices" },
           {
             label: "Create Invoices",
             href: "/dashboard/invoices/create",
