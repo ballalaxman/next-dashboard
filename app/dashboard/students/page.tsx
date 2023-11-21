@@ -2,8 +2,10 @@ import { fetchStudentPages } from "@/app/lib/data";
 import { lusitana } from "@/app/ui/font";
 import Search from "@/app/ui/search";
 import { AddStudent } from "@/app/ui/students/buttons";
-import React from "react";
+import React, { Suspense } from "react";
 import Table from "@/app/ui/students/table";
+import { InvoicesTableSkeleton } from "@/app/ui/skeletons";
+import Pagination from "@/app/ui/invoices/pagination";
 
 const Page = async ({
   searchParams,
@@ -30,7 +32,12 @@ const Page = async ({
         <Search placeholder="Search students..." />
         <AddStudent />
       </div>
-      <Table query={query} currentPage={currentPage} />
+      <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
+        <Table query={query} currentPage={currentPage} />
+      </Suspense>
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
+      </div>
     </div>
   );
 };

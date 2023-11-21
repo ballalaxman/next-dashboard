@@ -8,6 +8,7 @@ import {
   User,
   Revenue,
   StudentsTable,
+  StudentForm,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 import { unstable_noStore as noStore } from "next/cache";
@@ -276,7 +277,7 @@ export async function fetchFilteredStudents(
         name ILIKE ${`%${query}%`} OR
         village ILIKE ${`%${query}%`} OR
         status ILIKE ${`%${query}%`}
-      ORDER BY date DESC
+      ORDER BY students.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
@@ -284,5 +285,29 @@ export async function fetchFilteredStudents(
   } catch (error) {
     console.error("Database Error:", error);
     throw new Error("Failed to fetch invoices.");
+  }
+}
+
+export async function fetchStudentById(id: string) {
+  noStore();
+  try {
+    const data = await sql<StudentForm>`
+      SELECT
+      id,
+      name,
+      father_name,
+      mother_name,
+      class_std,
+      status,
+      school,
+      village,
+      contact
+      FROM students
+      WHERE id = ${id};
+    `;
+    return data.rows[0];
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch student.");
   }
 }

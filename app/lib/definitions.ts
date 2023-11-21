@@ -90,11 +90,11 @@ export type InvoiceForm = {
 export type StudentForm = {
   id: string;
   name: string;
-  fatherName: string;
-  motherName: string;
+  father_name: string;
+  mother_name: string;
   contact: number;
   village: string;
-  classStd: string;
+  class_std: string;
   school: string;
   status: "disqualified" | "qualified" | "selected";
 };
@@ -102,7 +102,6 @@ export type StudentForm = {
 export type StudentsTable = {
   id: string;
   name: string;
-  fatherName: string;
   school: string;
   class_std: string;
   status: "disqualified" | "qualified" | "selected";

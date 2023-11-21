@@ -20,7 +20,7 @@ const FormSchema = z.object({
   date: z.string(),
 });
 
-const AddStudentFormSchema = z.object({
+const StudentFormSchema = z.object({
   id: z.string(),
   name: z.string().min(1, { message: "Name is Required" }),
   fatherName: z.string(),
@@ -154,7 +154,7 @@ export const authenticate = async (
   }
 };
 
-const AddStudent = AddStudentFormSchema.omit({ id: true, date: true });
+const AddStudent = StudentFormSchema.omit({ id: true, date: true });
 
 export const addStudent = async (
   prevState: studentState,
@@ -186,7 +186,7 @@ export const addStudent = async (
     status,
     school,
   } = validatedFields.data;
-  const date = new Date().toISOString().split("T")[0];
+  const date = new Date().toISOString();
 
   try {
     await sql`
@@ -198,4 +198,63 @@ export const addStudent = async (
   }
   revalidatePath("/dashboard/students");
   redirect("/dashboard/students");
+};
+
+const UpdateStudent = StudentFormSchema.omit({ id: true, date: true });
+
+export const updateStudent = async (
+  id: string,
+  prevState: studentState,
+  formData: FormData
+) => {
+  const validatedFields = UpdateStudent.safeParse({
+    name: formData.get("name"),
+    fatherName: formData.get("fatherName"),
+    motherName: formData.get("motherName"),
+    contact: formData.get("contact"),
+    village: formData.get("village"),
+    classStd: formData.get("classStd"),
+    status: formData.get("status"),
+    school: formData.get("school"),
+  });
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields, Failed to add student",
+    };
+  }
+  const {
+    name,
+    fatherName,
+    motherName,
+    contact,
+    village,
+    classStd,
+    status,
+    school,
+  } = validatedFields.data;
+  const date = new Date().toISOString().split("T")[0];
+
+  try {
+    await sql`
+      UPDATE students
+      SET name = ${name}, father_name = ${fatherName}, mother_name = ${motherName}, contact = ${contact},village = ${village}, class_std = ${classStd}, status = ${status}, school = ${school}, date = ${date}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    return { message: "Database Error: Failed to update student" };
+  }
+  revalidatePath("/dashboard/students");
+  redirect("/dashboard/students");
+};
+
+export const deleteStudent = async (id: string) => {
+  try {
+    await sql`
+        DELETE FROM students WHERE id = ${id}
+    `;
+  } catch (error) {
+    return { message: "Database Error: Failed to delete invoice" };
+  }
+  revalidatePath("/dashboard/students");
 };

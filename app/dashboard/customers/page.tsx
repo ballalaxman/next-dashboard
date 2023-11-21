@@ -1,8 +1,7 @@
-import { lusitana } from "@/app/ui/font";
 import React, { Suspense } from "react";
 import Customerstable from "@/app/ui/customers/table";
 import { fetchFilteredCustomers } from "@/app/lib/data";
-import { InvoiceSkeleton, InvoicesTableSkeleton } from "@/app/ui/skeletons";
+import { InvoicesTableSkeleton } from "@/app/ui/skeletons";
 
 const Page = async ({
   searchParams,
